@@ -1,10 +1,13 @@
 import type { CodegenConfig } from '@graphql-codegen/cli';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const config: CodegenConfig & { headers: { [key: string]: string } } = {
   overwrite: true,
   schema: 'http://localhost:8080/v1/graphql',
   headers: {
-    'x-hasura-admin-secret': 'NGHAUHFJNBHBFQGZ',
+    'x-hasura-admin-secret': process.env.HASURA_GRAPHQL_ADMIN_SECRET!,
   },
   documents: 'queries/**/*.graphql',
   generates: {
@@ -25,3 +28,4 @@ const config: CodegenConfig & { headers: { [key: string]: string } } = {
 };
 
 export default config;
+

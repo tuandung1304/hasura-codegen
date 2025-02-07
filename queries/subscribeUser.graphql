@@ -1,0 +1,10 @@
+subscription SubscribeUser {
+  users {
+    id
+    name
+    address
+    age
+    __typename
+  }
+}
+

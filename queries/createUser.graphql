@@ -1,0 +1,16 @@
+mutation CreateUser($age: Int, $name: String, $address: String) {
+  insert_users_one(object: { address: $address, age: $age, name: $name }) {
+    ...UserFragment
+  }
+}
+
+fragment UserFragment on users {
+  id
+  name
+  age
+  address
+  createdAt
+  updatedAt
+  __typename
+}
+

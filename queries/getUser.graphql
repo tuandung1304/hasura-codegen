@@ -1,0 +1,10 @@
+query GetUser($id: Int!) {
+  users_by_pk(id: $id) {
+    id
+    name
+    address
+    age
+    __typename
+  }
+}
+
