@@ -1,3 +1,5 @@
+import { GraphQLClient, RequestOptions } from 'graphql-request'
+import gql from 'graphql-tag'
 export type Maybe<T> = T | null
 export type InputMaybe<T> = Maybe<T>
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -18,6 +20,7 @@ export type Incremental<T> =
   | {
       [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
     }
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders']
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string }
@@ -1024,3 +1027,106 @@ export type Users_Variance_Fields = {
   age?: Maybe<Scalars['Float']['output']>
   id?: Maybe<Scalars['Float']['output']>
 }
+
+export type CreateUserMutationVariables = Exact<{
+  name: Scalars['String']['input']
+  email: Scalars['String']['input']
+}>
+
+export type CreateUserMutation = {
+  __typename?: 'mutation_root'
+  insert_users_one?: {
+    __typename?: 'users'
+    id: number
+    name: string
+    email: string
+    address?: string | null
+  } | null
+}
+
+export type GetUserByIdQueryVariables = Exact<{
+  id: Scalars['Int']['input']
+}>
+
+export type GetUserByIdQuery = {
+  __typename?: 'query_root'
+  users_by_pk?: {
+    __typename?: 'users'
+    id: number
+    name: string
+    email: string
+  } | null
+}
+
+export const CreateUserDocument = gql`
+  mutation CreateUser($name: String!, $email: String!) {
+    insert_users_one(object: { name: $name, email: $email }) {
+      id
+      name
+      email
+      address
+    }
+  }
+`
+export const GetUserByIdDocument = gql`
+  query GetUserById($id: Int!) {
+    users_by_pk(id: $id) {
+      id
+      name
+      email
+    }
+  }
+`
+
+export type SdkFunctionWrapper = <T>(
+  action: (requestHeaders?: Record<string, string>) => Promise<T>,
+  operationName: string,
+  operationType?: string,
+  variables?: any,
+) => Promise<T>
+
+const defaultWrapper: SdkFunctionWrapper = (
+  action,
+  _operationName,
+  _operationType,
+  _variables,
+) => action()
+
+export function getSdk(
+  client: GraphQLClient,
+  withWrapper: SdkFunctionWrapper = defaultWrapper,
+) {
+  return {
+    CreateUser(
+      variables: CreateUserMutationVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+    ): Promise<CreateUserMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CreateUserMutation>(CreateUserDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        'CreateUser',
+        'mutation',
+        variables,
+      )
+    },
+    GetUserById(
+      variables: GetUserByIdQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+    ): Promise<GetUserByIdQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GetUserByIdQuery>(GetUserByIdDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        'GetUserById',
+        'query',
+        variables,
+      )
+    },
+  }
+}
+export type Sdk = ReturnType<typeof getSdk>
